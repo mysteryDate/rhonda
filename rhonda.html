@@ -3,67 +3,243 @@
 <meta charset="UTF-8">
 <head>
   <title></title>
-  <script type="text/javascript" src="drawFunction.js"></script>
+  <style type="text/css">
+    canvas {
+      border: 1px solid black;
+    }
+    img {
+      display: none;
+    }
+  </style>
 </head>
 <body>
+  <img id="jeff" src="jeff2.jpg">
 </body>
 <script type="text/javascript" src="easing.js"></script>
+<script type="text/javascript" src="lerp.js"></script>
+<script type="text/javascript" src="drawFunction.js"></script>
 <script type="text/javascript">
-  const lerp = function (min, max, c) {
-      c = c < 0 ? 0 : c;
-      c = c > 1 ? 1 : c;
-      return min + (max - min) * c;
-  }
-  function lerp01(x) {
-    return lerp(0, 1, x);
+  "use strict";
+  const originalRhonda = {
+    w: 375,
+    h: 150,
+    x: 100,
+    y: -100,
+    fontSize: 40,
+    fontPosition: 0,
+    radii: [
+      new DOMPoint(0, 0),
+      new DOMPoint(0, 0),
+      new DOMPoint(0, 0),
+      new DOMPoint(0, 0),
+    ],
+    rotation: 0,
+    text: ["Hi", "I'm Rhonda!"],
+    textColor: [0, 0, 0],
+    bgColor: [0, 255, 255],
+    alpha: 1,
   }
   const canvas = document.createElement("canvas");
   document.body.appendChild(canvas);
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  canvas.height = 400;
+  canvas.width = canvas.height / 9 * 16;
+  originalRhonda.x = canvas.width/2 - originalRhonda.w/2;
+  originalRhonda.y = -originalRhonda.h;
+
+  let rhonda = {};
+  Object.assign(rhonda, originalRhonda);
   const ctx = canvas.getContext("2d");
+  const jeffImg = document.getElementById("jeff");
+  let startRhonda = {};
+  ctx.textBaseline = "hanging";
 
-  const minR = 0;
-  const maxR = 50;
-  const duration = 2;
-  function drawRect(t) {
-    ctx.fillStyle = "cyan";
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  function drawText(textArray, verticalAdjustment=0) {
+    ctx.fillStyle = `rgb(${rhonda.textColor[0]}, ${rhonda.textColor[0]}, ${rhonda.textColor[2]})`;
+    ctx.font = `${rhonda.fontSize}px Google Sans`;
+    let maxWidth = 0;
+    let totalDescent = 0;
+    for (let i = 0; i < textArray.length; i++) {
+      let textMetrics = ctx.measureText(textArray[i]);
+      maxWidth = Math.max(maxWidth, textMetrics.width);
+      totalDescent += textMetrics.emHeightDescent;
+    }
+    const leftPadding = (rhonda.w - maxWidth) / 2;
+    const topPadding = (rhonda.h - totalDescent) / 2;
+    for (let i = 0; i < textArray.length; i++) {
+      let x = rhonda.x + leftPadding;
+      let y = rhonda.y + topPadding + i * rhonda.fontSize + verticalAdjustment;
+      ctx.fillText(textArray[i], x, y);
+    }
+  }
+
+  function drawRhonda() {
+    ctx.fillStyle = `rgb(${rhonda.bgColor[0]}, ${rhonda.bgColor[1]}, ${rhonda.bgColor[2]}, ${rhonda.alpha})`;
+
     ctx.beginPath();
-    ctx.roundRect(10, 10, 200, 100, [0]);
+    ctx.roundRect(rhonda.x, rhonda.y, rhonda.w, rhonda.h, rhonda.radii);
     ctx.fill();
-
-    ctx.fillStyle = "black";
-    ctx.font = "30px Google Sans";
-    ctx.fillText("Hi!", 10, 70);
-    ctx.fillText("I'm Rhonda! ❤️", 10, 100);
   }
 
 
-  function drawRoundRect(t) {
-    const r = lerp(minR, maxR, easing.easeInOutCubic(t));
-
-    ctx.fillStyle = "cyan";
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.beginPath();
-    ctx.roundRect(10, 10, 200, 100, [r]);
-    ctx.fill();
-
-    ctx.fillStyle = "black";
-    ctx.font = "30px Google Sans";
-    ctx.fillText("Hi!", 10, 70);
-    ctx.fillText("I'm Rhonda! ❤️", 10, 100);
+  function slideIn(t) {
+    const endPos = {
+        x: canvas.width/2 - rhonda.w/2,
+        y: canvas.height/2 - rhonda.h/2,
+    };
+    if (!this.hasRun) Object.assign(startRhonda, rhonda);
+    lerpDicts(rhonda, startRhonda, endPos, t);
+    drawRhonda();
+    drawText(rhonda.text);
   }
 
-  const d0 = new DrawFunction(drawRect, 20, easing.easeInOutCubic);
-  const d1 = new DrawFunction(drawRoundRect, 20, easing.easeInOutCubic);
-  let dF = -1;
+  function roundRectangle(t) {
+    const borderRadius = Math.min(rhonda.w, rhonda.h) / 2;
+    for (var i = 0; i < rhonda.radii.length; i++) {
+      rhonda.radii[i].x = lerp(startRhonda.radii[i].x, borderRadius, t);
+      rhonda.radii[i].y = lerp(startRhonda.radii[i].y, borderRadius, t);
+    }
+
+    drawRhonda();
+    drawText(rhonda.text);
+  }
+
+  function rectangleLove(t) {
+    drawRhonda();
+    rhonda.text = ["👍😁"]
+    rhonda.fontSize = 60;
+    drawText(rhonda.text, rhonda.fontSize * 0.12);
+  }
+
+  function toTextBubble(t) {
+    const endPos = {
+        x: 5,
+        y: canvas.height - rhonda.h - 5,
+        radii: [
+          new DOMPoint(40, 40),
+          new DOMPoint(20, 20),
+          new DOMPoint(40, 40),
+          new DOMPoint(0, 0)
+        ],
+    };
+    if (!this.hasRun) Object.assign(startRhonda, rhonda);
+    lerpDicts(rhonda, startRhonda, endPos, t);
+
+    drawRhonda();
+    if (t > 0.5) {
+      rhonda.text = ["What's up? 😜"];
+      rhonda.fontSize = originalRhonda.fontSize;
+    }
+    drawText(rhonda.text, rhonda.fontSize * 0.12);
+  }
+
+  function toButton(t) {
+    const end = {
+        x: (canvas.width - rhonda.w)/2,
+        y: 70,
+        radii: [
+          new DOMPoint(40, 40),
+          new DOMPoint(40, 40),
+          new DOMPoint(40, 40),
+          new DOMPoint(40, 40)
+        ],
+        bgColor: [98, 0, 238],
+        textColor: [255, 255, 255],
+        w: 350,
+    };
+    if (!this.hasRun) Object.assign(startRhonda, rhonda);
+    lerpDicts(rhonda, startRhonda, end, t);
+
+    ctx.shadowColor = "black";
+    ctx.shadowBlur = lerp(0, 15, t);
+    ctx.shadowOffsetX = lerp(0, 2, t);
+    ctx.shadowOffsetY = lerp(0, 5, t);
+
+    drawRhonda();
+    if (t > 0.0) {
+      rhonda.text = ["I'M A BUTTON"];
+    }
+    ctx.shadowColor = "rgba(0, 0, 0, 0)";
+    drawText(rhonda.text, rhonda.fontSize * 0.12);
+  }
+  function toGuitarPick1(t) {
+    const size = 300;
+    const end = {
+      w: size,
+      h: size,
+      y: (canvas.height - size)/4,
+      x: (canvas.width - size)/2,
+    }
+    if (!this.hasRun) Object.assign(startRhonda, rhonda);
+    lerpDicts(rhonda, startRhonda, end, t);
+    const x = 600;
+    const y = 500;
+    const s = 1.25;
+    canvas.width = canvas.width;
+    ctx.beginPath();
+    ctx.roundRect(rhonda.x, rhonda.y, rhonda.w, rhonda.h, rhonda.radii);
+    ctx.shadowColor = "black";
+    ctx.shadowBlur = lerp(15, 0, t);
+    ctx.shadowOffsetX = lerp(2, 0, t);
+    ctx.shadowOffsetY = lerp(5, 0, t);
+    ctx.fill();
+    ctx.save();
+    ctx.beginPath();
+    ctx.roundRect(rhonda.x, rhonda.y, rhonda.w, rhonda.h, rhonda.radii);
+    ctx.clip();
+    ctx.drawImage(jeffImg, x, y, jeffImg.width, jeffImg.height, rhonda.x, rhonda.y, s * rhonda.w, rhonda.w * jeffImg.height / jeffImg.width * s);
+    ctx.restore();
+
+  }
+  function toGuitarPick2(t) {
+    const end = {
+      radii: [
+        new DOMPoint(rhonda.w * 0.62, rhonda.h * 0.59),
+        new DOMPoint(rhonda.w * 0.33, rhonda.h * 0.79),
+        new DOMPoint(rhonda.w * 0.11, rhonda.h * 0.17),
+        new DOMPoint(rhonda.w * 0.78, rhonda.h * 0.41),
+      ],
+      textColor: [0, 0, 0],
+      fontPosition: rhonda.h * 0.6,
+      fontSize: 25,
+    }
+    if (!this.hasRun) Object.assign(startRhonda, rhonda);
+    rhonda.alpha = 0;
+    lerpDicts(rhonda, startRhonda, end, t);
+
+    const x = 600;
+    const y = 500;
+    const s = 1.25;
+    canvas.width = canvas.width;
+    ctx.save();
+    ctx.beginPath();
+    ctx.roundRect(rhonda.x, rhonda.y, rhonda.w, rhonda.h, rhonda.radii);
+    ctx.clip();
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(jeffImg, x, y, jeffImg.width, jeffImg.height, rhonda.x, rhonda.y, s * rhonda.w, rhonda.h * jeffImg.height / jeffImg.width * s);
+    ctx.restore();
+    rhonda.text = ["Rhonda Purrington", "Chief Mouse Extractor"]
+    drawText(rhonda.text, rhonda.fontSize * 0.12 + rhonda.fontPosition);
+  }
+
+  const timeline = [
+    new DrawFunction(slideIn, 1),
+    new DrawFunction(roundRectangle, 1),
+    new DrawFunction(rectangleLove, 0),
+    new DrawFunction(toTextBubble, 1),
+    new DrawFunction(toButton, 1),
+    new DrawFunction(toGuitarPick1, 1),
+    new DrawFunction(toGuitarPick2, 1),
+  ];
+  let dF = 3;
   let startTime = 0;
-  const timeline = [d0, d1]
 
+  timeline[dF].run();
   window.onkeydown = (e) => {
+    if (dF > 0)
+      timeline[dF].cancel();
     dF++;
-    timeline[dF].run();
+    if (dF < timeline.length)
+      timeline[dF].run();
   }
 </script>
 </html>
