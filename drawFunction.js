@@ -20,13 +20,13 @@ class DrawFunction {
   }
 
   draw() {
-    let t = (performance.now() - this.startTime) / 1000 / this.duration;
-    t = this.easing(t);
+    const clock = (performance.now() - this.startTime) / 1000 / this.duration;
+    const t = this.easing(clock);
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     this.func(t);
 
-    if (t <= 1 && !this.isCancelled)
+    if (clock <= 1.0 && !this.isCancelled)
       window.requestAnimationFrame(this.draw.bind(this));
   }
 

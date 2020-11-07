@@ -16,7 +16,7 @@
   <img id="jeff" src="jeff2.jpg">
 </body>
 <script type="text/javascript" src="easing.js"></script>
-<script type="text/javascript" src="lerp.js"></script>
+<script type="text/javascript" src="util.js"></script>
 <script type="text/javascript" src="drawFunction.js"></script>
 <script type="text/javascript">
   "use strict";
@@ -46,16 +46,15 @@
   originalRhonda.x = canvas.width/2 - originalRhonda.w/2;
   originalRhonda.y = -originalRhonda.h;
 
-  let rhonda = {};
-  Object.assign(rhonda, originalRhonda);
+  let rhonda = copyRhonda(originalRhonda);
+  let startRhonda = copyRhonda(rhonda)
   const ctx = canvas.getContext("2d");
   const jeffImg = document.getElementById("jeff");
-  let startRhonda = {};
   ctx.textBaseline = "hanging";
 
-  function drawText(textArray, verticalAdjustment=0) {
+  function drawText(textArray, verticalAdjustment=0, fontFamily="Google Sans") {
     ctx.fillStyle = `rgb(${rhonda.textColor[0]}, ${rhonda.textColor[0]}, ${rhonda.textColor[2]})`;
-    ctx.font = `${rhonda.fontSize}px Google Sans`;
+    ctx.font = `${rhonda.fontSize}px ${fontFamily}`;
     let maxWidth = 0;
     let totalDescent = 0;
     for (let i = 0; i < textArray.length; i++) {
@@ -86,7 +85,7 @@
         x: canvas.width/2 - rhonda.w/2,
         y: canvas.height/2 - rhonda.h/2,
     };
-    if (!this.hasRun) Object.assign(startRhonda, rhonda);
+    if (!this.hasRun) startRhonda = copyRhonda(rhonda);
     lerpDicts(rhonda, startRhonda, endPos, t);
     drawRhonda();
     drawText(rhonda.text);
@@ -104,9 +103,9 @@
   }
 
   function rectangleLove(t) {
-    drawRhonda();
     rhonda.text = ["👍😁"]
     rhonda.fontSize = 60;
+    drawRhonda();
     drawText(rhonda.text, rhonda.fontSize * 0.12);
   }
 
@@ -114,6 +113,7 @@
     const endPos = {
         x: 5,
         y: canvas.height - rhonda.h - 5,
+        h: 100,
         radii: [
           new DOMPoint(40, 40),
           new DOMPoint(20, 20),
@@ -121,7 +121,7 @@
           new DOMPoint(0, 0)
         ],
     };
-    if (!this.hasRun) Object.assign(startRhonda, rhonda);
+    if (!this.hasRun) startRhonda = copyRhonda(rhonda);
     lerpDicts(rhonda, startRhonda, endPos, t);
 
     drawRhonda();
@@ -146,7 +146,7 @@
         textColor: [255, 255, 255],
         w: 350,
     };
-    if (!this.hasRun) Object.assign(startRhonda, rhonda);
+    if (!this.hasRun) startRhonda = copyRhonda(rhonda);
     lerpDicts(rhonda, startRhonda, end, t);
 
     ctx.shadowColor = "black";
@@ -156,7 +156,7 @@
 
     drawRhonda();
     if (t > 0.0) {
-      rhonda.text = ["I'M A BUTTON"];
+      rhonda.text = ["ENHANCE"]
     }
     ctx.shadowColor = "rgba(0, 0, 0, 0)";
     drawText(rhonda.text, rhonda.fontSize * 0.12);
@@ -169,12 +169,11 @@
       y: (canvas.height - size)/4,
       x: (canvas.width - size)/2,
     }
-    if (!this.hasRun) Object.assign(startRhonda, rhonda);
+    if (!this.hasRun) startRhonda = copyRhonda(rhonda);
     lerpDicts(rhonda, startRhonda, end, t);
     const x = 600;
     const y = 500;
     const s = 1.25;
-    canvas.width = canvas.width;
     ctx.beginPath();
     ctx.roundRect(rhonda.x, rhonda.y, rhonda.w, rhonda.h, rhonda.radii);
     ctx.shadowColor = "black";
@@ -202,14 +201,12 @@
       fontPosition: rhonda.h * 0.6,
       fontSize: 25,
     }
-    if (!this.hasRun) Object.assign(startRhonda, rhonda);
-    rhonda.alpha = 0;
+    if (!this.hasRun) startRhonda = copyRhonda(rhonda);
     lerpDicts(rhonda, startRhonda, end, t);
 
     const x = 600;
     const y = 500;
     const s = 1.25;
-    canvas.width = canvas.width;
     ctx.save();
     ctx.beginPath();
     ctx.roundRect(rhonda.x, rhonda.y, rhonda.w, rhonda.h, rhonda.radii);
@@ -221,25 +218,180 @@
     drawText(rhonda.text, rhonda.fontSize * 0.12 + rhonda.fontPosition);
   }
 
+  function confusedLove(t) {
+    const borderRadius = Math.min(rhonda.w, rhonda.h) / 8;
+    const end = {
+      x: canvas.width/2 - rhonda.w/2,
+      h: originalRhonda.h,
+      y: canvas.height/2 - originalRhonda.h/2,
+      bgColor: originalRhonda.bgColor,
+      fontPosition: 0,
+      fontSize: 60,
+      radii: [
+        new DOMPoint(borderRadius, borderRadius),
+        new DOMPoint(borderRadius, borderRadius),
+        new DOMPoint(borderRadius, borderRadius),
+        new DOMPoint(borderRadius, borderRadius),
+      ]
+    };
+    rhonda.text = ["⏳❤️🤷‍♀️"]
+    if (!this.hasRun) startRhonda = copyRhonda(rhonda);
+    lerpDicts(rhonda, startRhonda, end, t);
+    drawRhonda();
+    drawText(rhonda.text, rhonda.fontSize * 0.12 + rhonda.fontPosition);
+  }
+
+  function CSSImplementation(t) {
+    const end = {
+      y: 50,
+      fontSize: 30,
+      fontPosition: 130,
+      radii: [
+        new DOMPoint(50, 50),
+        new DOMPoint(50, 50),
+        new DOMPoint(50, 50),
+        new DOMPoint(50, 50),
+      ],
+    }
+    let fontFamily = "Google Sans";
+    if (t > 0.5) {
+      rhonda.text = ["#rhonda: {", "\t\tborder-radius: 50px;", "}"]
+      fontFamily = "Courier New";
+    }
+    if (!this.hasRun) startRhonda = copyRhonda(rhonda);
+    lerpDicts(rhonda, startRhonda, end, t);
+    drawRhonda();
+    drawText(rhonda.text, rhonda.fontSize * 0.12 + rhonda.fontPosition, fontFamily);
+  }
+
+  function romanceOfJS(t) {
+    const end = {
+      x: canvas.width/2 - rhonda.w/2,
+      y: canvas.height/2 - rhonda.h/2,
+      fontSize: 60,
+      fontPosition: 0,
+      w: rhonda.h * 1.5,
+    }
+    if (!this.hasRun) startRhonda = copyRhonda(rhonda);
+    if (t > 0.5)
+      rhonda.text = ["js💘"];
+    lerpDicts(rhonda, startRhonda, end, t);
+    ctx.save();
+    ctx.translate(rhonda.x + rhonda.w/2, rhonda.y + rhonda.h/2);
+    ctx.rotate(t * Math.PI * 4);
+    ctx.translate(-(rhonda.x + rhonda.w/2), -(rhonda.y + rhonda.h/2));
+    drawRhonda();
+    drawText(rhonda.text, rhonda.fontSize * 0.12 + rhonda.fontPosition, "Courier New");
+    ctx.restore();
+  }
+
+  function respondToUser(t) {
+    const end = {
+      fontSize: 60,
+    }
+    if (!this.hasRun) startRhonda = copyRhonda(rhonda);
+    lerpDicts(rhonda, startRhonda, end, t);
+    rhonda.text = ["🖱⌨️"]
+    drawRhonda();
+    drawText(rhonda.text, rhonda.fontSize * 0.12 + rhonda.fontPosition, "Courier New");
+  }
+
+  function dance(t) {
+    rhonda.text = ["💃"]
+    if (!this.hasRun) startRhonda = copyRhonda(rhonda);
+    ctx.save();
+    rhonda.x = Math.cos(t * 3 * Math.PI) * 200 * Math.sin(t * Math.PI) + startRhonda.x;
+    rhonda.y = Math.sin(t * 3 * Math.PI) * 200 * Math.sin(t * Math.PI) + startRhonda.y;
+    ctx.translate(rhonda.x + rhonda.w/2, rhonda.y + rhonda.h/2);
+    ctx.rotate(t * Math.PI * 8);
+    ctx.translate(-(rhonda.x + rhonda.w/2), -(rhonda.y + rhonda.h/2));
+    drawRhonda();
+    drawText(rhonda.text, rhonda.fontSize * 0.12 + rhonda.fontPosition);
+    ctx.restore();
+  }
+
+  function canvasImplementation(t) {
+    const canvas2DText = [
+      "ctx.beginPath();",
+      "ctx.moveTo(left + radius, upper);",
+      "ctx.lineTo(left + width - radius, upper);",
+      "ctx.arcTo(left + width, upper, left + width, upper + radius, radius);",
+      "ctx.lineTo(left + width, upper + height - radius);",
+      "ctx.arcTo(left + width, upper + height, left + width - radius, upper + height, radius);",
+      "ctx.lineTo(left + radius, upper + height);",
+      "ctx.arcTo(left, upper + height, left, upper + height - radius, radius);",
+      "ctx.lineTo(left, upper + radius);",
+      "ctx.arcTo(left, upper, left + radius, upper, radius);",
+      "ctx.fill();",
+    ];
+    const end = {
+      y: 50,
+      h: 100,
+      fontSize: 60,
+    }
+    rhonda.text = ["🤕"]
+    let fontFamily = "Courier New";
+    if (!this.hasRun) startRhonda = copyRhonda(rhonda);
+    lerpDicts(rhonda, startRhonda, end, t);
+    drawRhonda();
+    drawText(rhonda.text, rhonda.fontSize * 0.12 + rhonda.fontPosition, fontFamily);
+    rhonda.fontSize = lerp(0, 12, t);
+    drawText(canvas2DText, rhonda.fontSize * 0.12 + 130, "Courier New");
+    rhonda.fontSize = 60;
+  }
+
+  function webGL(t) {
+    const webGLText = ["const ctx = canvas.getContext('webgl');"];
+    const end = {
+      y: 50,
+      fontSize: 60,
+    }
+    let fontFamily = "Google Sans";
+    rhonda.text = ["👋"]
+    if (!this.hasRun) startRhonda = copyRhonda(rhonda);
+    lerpDicts(rhonda, startRhonda, end, t);
+    drawRhonda();
+    drawText(rhonda.text, rhonda.fontSize * 0.12 + rhonda.fontPosition, fontFamily);
+    rhonda.fontSize = lerp(0, 20, t);
+    drawText(webGLText, rhonda.fontSize * 0.12 + 130, "Courier New");
+  }
+
   const timeline = [
     new DrawFunction(slideIn, 1),
     new DrawFunction(roundRectangle, 1),
-    new DrawFunction(rectangleLove, 0),
+    new DrawFunction(rectangleLove, 1),
     new DrawFunction(toTextBubble, 1),
     new DrawFunction(toButton, 1),
     new DrawFunction(toGuitarPick1, 1),
     new DrawFunction(toGuitarPick2, 1),
+    new DrawFunction(confusedLove, 1),
+    new DrawFunction(CSSImplementation, 1),
+    new DrawFunction(romanceOfJS, 1),
+    new DrawFunction(respondToUser, 1),
+    new DrawFunction(dance, 4, easing.easeInOutBack),
+    new DrawFunction(canvasImplementation, 1),
+    new DrawFunction(webGL, 1),
+    // new DrawFunction(() => {}, 1),
   ];
-  let dF = 3;
   let startTime = 0;
 
-  timeline[dF].run();
+  let dF = -1;
+  let autorun = true;
+  autorun = false;
+  // dF = timeline.length - 2;
+  // timeline[dF].run();
   window.onkeydown = (e) => {
-    if (dF > 0)
+    if (dF > 0 && dF < timeline.legth)
       timeline[dF].cancel();
     dF++;
-    if (dF < timeline.length)
+    if (dF < timeline.length && dF >= 0)
       timeline[dF].run();
+  }
+
+  if (autorun) {
+    window.setInterval(() => {
+      window.onkeydown();
+    }, 1000);
   }
 </script>
 </html>
