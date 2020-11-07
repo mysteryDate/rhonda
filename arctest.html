@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>arctest</title>
+  <style type="text/css">
+    canvas {
+      border: 1px solid magenta;
+    }
+  </style>
+</head>
+<body>
+
+</body>
+<script type="text/javascript">
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  document.body.appendChild(canvas);
+
+  ctx.moveTo(10, 10);
+  ctx.lineTo(110, 10);
+  ctx.arc(10, 10, 100, 0, Math.PI/4);
+  ctx.stroke();
+
+</script>
+</html>

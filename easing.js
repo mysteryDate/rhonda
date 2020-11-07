@@ -15,6 +15,10 @@
   else if (typeof module != 'undefined') module.exports = definition;
   else this[name] = definition;
 }('easing', {
+  linear: function(pos) {
+    return pos;
+  },
+
   easeInQuad: function(pos) {
     return Math.pow(pos, 2);
   },
