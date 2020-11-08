@@ -24,7 +24,7 @@ class DrawFunction {
     const t = this.easing(clock);
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    this.func(t);
+    this.func(t, clock);
 
     if (clock <= 1.0 && !this.isCancelled)
       window.requestAnimationFrame(this.draw.bind(this));

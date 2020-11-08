@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<meta charset="UTF-8">
+<html>
+<head>
+  <title>Text Modifiers</title>
+  <style type="text/css">
+    canvas {
+      border: 1px solid black;
+    }
+    @font-face {
+      src: url('LeagueMonoVariable.ttf');
+      font-family:'LeagueMonoVariable';
+      font-style: normal;
+      font-stretch: 1% 500%; /* Required by Chrome */
+    }
+    p {
+      position: absolute;
+      font-family: "LeagueMonoVariable";
+      font-size: 40px;
+      top: 140px;
+      width: 711px;
+      vertical-align: middle;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <p id="p"></p>
+</body>
+<script type="text/javascript" src="util.js"></script>
+<script type="text/javascript" src="easing.js"></script>
+<script type="text/javascript" src="drawFunction.js"></script>
+<script type="text/javascript">
+  const canvas = document.createElement("canvas");
+  const p = document.getElementById("p");
+  document.body.appendChild(canvas);
+  canvas.height = 400;
+  canvas.width = canvas.height / 9 * 16;
+  const ctx = canvas.getContext("2d");
+
+  const text = {
+    size: 40,
+    font: "Google Sans",
+    message: ["hi"],
+    x: 0,
+    // y: -100,
+    y: canvas.height/2,
+    color: "black",
+  }
+  let startText = {};
+  Object.assign(startText, text);
+  ctx.textBaseline = "middle";
+
+
+  function drawText(textArray, verticalAdjustment=0) {
+    ctx.fillStyle = text.color;
+    ctx.font = `${text.size}px ${text.font}`;
+    ctx.font = text.font;
+    ctx.textAlign = "center";
+    let maxWidth = 0;
+    let totalDescent = 0;
+    for (let i = 0; i < textArray.length; i++) {
+      let textMetrics = ctx.measureText(textArray[i]);
+      maxWidth = Math.max(maxWidth, textMetrics.width);
+      totalDescent += textMetrics.emHeightDescent;
+    }
+    topPadding = 0;
+    for (let i = 0; i < textArray.length; i++) {
+      let x = canvas.width/2 + text.x;
+      let y = text.y + i * text.size * 1.3 - text.size * 1.3 / 2 * (textArray.length - 1);
+      ctx.fillText(textArray[i], x, y);
+    }
+  }
+
+  function slideIn(t, clock) {
+    text.message = ["⌨️ Text Modifiers! 📝"];
+    const endText = {
+      y: canvas.height/2,
+    }
+    if (!this.hasRun) startText = copyRhonda(text);
+    lerpDicts(text, startText, endText, t);
+    drawText(text.message);
+  }
+
+  function textLetterSpacing(t, clock) {
+    text.message = ["ctx.textLetterSpacing"];
+    ctx.textLetterSpacing = t * 10;
+    drawText(text.message);
+  }
+
+  function wordSpacing(t, clock) {
+    ctx.textLetterSpacing = 0;
+    text.message = ["text word spacing"];
+    ctx.textWordSpacing = t * 50;
+    drawText(text.message);
+  }
+
+  function fontVariant(t, clock) {
+    const variants = ["Normal", "Small-Caps", "all small caps"];
+    const variant = variants[Math.min(Math.floor(clock * variants.length), variants.length - 1)]
+    ctx.textWordSpacing = 0;
+    ctx.fontVariantCaps = variant;
+
+    text.message = ["ctx.fontVariant = ", `${variant}`];
+    drawText(text.message);
+  }
+
+  function fontKerning(t, clock) {
+    ctx.fontVariantCaps = "Normal";
+
+    let kerning = "normal";
+    if (Math.floor(clock * 3) % 2 == 1)
+      kerning = "none";
+    ctx.fontKerning = kerning;
+
+    text.message = [`ctx.fontKerning = ${kerning}`, "AV T. ij"];
+    drawText(text.message);
+  }
+
+  function fontStretch(t, clock) {
+    ctx.fontKerning = "auto";
+
+    const stretchValues = ["50%", "100%", "200%"];
+    const stretch = stretchValues[Math.min(Math.floor(clock * stretchValues.length), stretchValues.length - 1)];
+
+    p.innerText = `ctx.fontStretch = ${stretch}`;
+    p.style.fontStretch = stretch;
+  }
+
+  function textDecoration(t, clock) {
+    p.style.fontStretch = "";
+    p.style.fontFamily = "Google Sans";
+
+    const vals = ["underline red", "dashed underline overline", "wavy overline lime"];
+    const decoration = vals[Math.min(Math.floor(clock * vals.length), vals.length - 1)];
+
+    p.style.textDecoration = decoration;
+    p.innerText = `ctx.textDecoration`;
+  }
+
+  function underlinePosition(t, clock) {
+    p.style.textDecoration = "underline";
+    p.style.fontStretch = "";
+    p.style.fontFamily = "Google Sans";
+
+    let underlinePos = "under";
+    if (Math.floor(clock * 3) % 2 == 1)
+      underlinePos = "left";
+
+    p.style.textUnderlinePosition = underlinePos;
+    p.innerText = `ctx.underlinePosition`;
+  }
+
+  function textRendering(t, clock) {
+    p.style.textDecoration = "";
+    p.style.fontStretch = "";
+    p.style.fontFamily = "Google Sans";
+
+    p.innerText = `ctx.textRendering`;
+  }
+
+  const timeline = [
+    new DrawFunction(slideIn, 1),
+    new DrawFunction(textLetterSpacing, 2, easing.easeInOutBack),
+    new DrawFunction(wordSpacing, 2, easing.bounce),
+    new DrawFunction(fontVariant, 2),
+    new DrawFunction(fontKerning, 2),
+    new DrawFunction(fontStretch, 2),
+    new DrawFunction(textDecoration, 3),
+    new DrawFunction(underlinePosition, 3),
+    new DrawFunction(textRendering, 3),
+  ];
+  let startTime = 0;
+
+  let dF = -1;
+  // dF = 7;
+  let autorun = true;
+  autorun = false;
+  // dF = timeline.length - 2;
+  // timeline[dF].run();
+  window.onkeydown = (e) => {
+    if (dF > 0 && dF < timeline.legth)
+      timeline[dF].cancel();
+    dF++;
+    if (dF < timeline.length && dF >= 0)
+      timeline[dF].run();
+  }
+
+  if (autorun) {
+    window.setInterval(() => {
+      window.onkeydown();
+    }, 1000);
+  }
+</script>
+</html>

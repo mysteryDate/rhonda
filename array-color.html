@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Array Color</title>
+  <style type="text/css">
+    canvas {
+      border: 1px solid black;
+    }
+  </style>
+</head>
+<body>
+</body>
+<script type="text/javascript" src="util.js"></script>
+<script type="text/javascript" src="easing.js"></script>
+<script type="text/javascript" src="drawFunction.js"></script>
+<script type="text/javascript">
+  const canvas = document.createElement("canvas");
+  document.body.appendChild(canvas);
+  canvas.height = 400;
+  canvas.width = canvas.height / 9 * 16;
+  const ctx = canvas.getContext("2d");
+
+  const startWidth = 350;
+  const startHeight = 200;
+  const swatch = {
+    x: canvas.width/2 - startWidth/2,
+    y: -startHeight,
+    // y: 50,
+    w: startWidth,
+    h: startHeight,
+    radius: 20,
+    r: 0,
+    g: 0,
+    b: 0,
+  }
+  let startSwatch = {};
+  Object.assign(startSwatch, swatch);
+  const text = {
+    size: 30,
+    font: "Courier New",
+    message: ["hi"],
+    x: 0,
+    y: canvas.height + 100,
+    // y: 300,
+    color: "black",
+  }
+  let startText = {};
+  Object.assign(startText, text);
+  ctx.textBaseline = "middle";
+
+  function drawColorSwatch(color) {
+    if (color)
+      ctx.fillStyle = color;
+    else
+      ctx.fillStyle = `rgb(${swatch.r}, ${swatch.g}, ${swatch.b})`;
+    ctx.beginPath();
+    ctx.roundRect(swatch.x, swatch.y, swatch.w, swatch.h, [swatch.radius]);
+    ctx.fill();
+    ctx.stroke();
+  }
+
+  function drawText(textArray, verticalAdjustment=0) {
+    ctx.fillStyle = text.color;
+    ctx.font = `${text.size}px ${text.font}`;
+    ctx.font = text.font;
+    ctx.textAlign = "center";
+    let maxWidth = 0;
+    let totalDescent = 0;
+    for (let i = 0; i < textArray.length; i++) {
+      let textMetrics = ctx.measureText(textArray[i]);
+      maxWidth = Math.max(maxWidth, textMetrics.width);
+      totalDescent += textMetrics.emHeightDescent;
+    }
+    const leftPadding = (swatch.w - maxWidth) / 2;
+    let topPadding = (swatch.h - totalDescent) / 2;
+    topPadding = 0;
+    for (let i = 0; i < textArray.length; i++) {
+      let x = swatch.x + swatch.w/2 + text.x;
+      // let y = swatch.y + topPadding + i * text.size + verticalAdjustment;
+      let y = text.y + i * text.size * 1.3;
+      ctx.fillText(textArray[i], x, y);
+    }
+  }
+
+  const startColor = "OrangeRed";
+  const colorNames = ["DodgerBlue", "BlanchedAlmond", "LawnGreen", "LightGoldenrodYellow", "Chocolate"];
+  const transitionColor = [210, 105, 30]; // Chocolate
+  function slideIn(t, clock) {
+    const end = {
+      y: 50,
+    }
+    const endText = {
+      y: 300,
+    }
+    if (!this.hasRun) startSwatch = copyRhonda(swatch);
+    if (!this.hasRun) startText = copyRhonda(text);
+    lerpDicts(swatch, startSwatch, end, t);
+    lerpDicts(text, startText, endText, t);
+    drawColorSwatch(startColor);
+    drawText([`backgroundColor = `,`"${startColor}";`]);
+  }
+
+  function namedColors(t, clock) {
+    color = colorNames[Math.min(colorNames.length - 1, Math.floor(clock * colorNames.length))];
+    drawColorSwatch(color);
+    drawText([`backgroundColor = `,`"${color}";`]);
+    swatch.r = transitionColor[0];
+    swatch.g = transitionColor[1];
+    swatch.b = transitionColor[2];
+  }
+
+  function animatingPain(t, clock) {
+    const end = {
+      r: 25,
+      g: 25,
+      b: 112,
+    }
+    if (!this.hasRun) startSwatch = copyRhonda(swatch);
+    lerpDicts(swatch, startSwatch, end, t);
+
+    drawColorSwatch();
+    drawText([`ctx.fillColor = `,`"rgb(${swatch.r.toFixed(0)}, ${swatch.g.toFixed(0)}, ${swatch.b.toFixed(0)})";`]);
+  }
+
+  function arrayColorInput(t, clock) {
+    end = {
+      r: 255,
+      g: 225,
+      b: 25,
+    }
+    if (!this.hasRun) startSwatch = copyRhonda(swatch);
+    lerpDicts(swatch, startSwatch, end, Math.pow(t, 3));
+
+    drawColorSwatch();
+    drawText([`ctx.fillColor = `,`[${swatch.r.toFixed(0)}, ${swatch.g.toFixed(0)}, ${swatch.b.toFixed(0)}];`]);
+  }
+
+  const timeline = [
+    new DrawFunction(slideIn, 1),
+    new DrawFunction(namedColors, 2),
+    new DrawFunction(animatingPain, 2),
+    new DrawFunction(arrayColorInput, 4, easing.bounce),
+  ];
+  let startTime = 0;
+
+  let dF = -1;
+  dF = 0;
+  let autorun = true;
+  autorun = false;
+  // dF = timeline.length - 2;
+  timeline[dF].run();
+  window.onkeydown = (e) => {
+    if (dF > 0 && dF < timeline.legth)
+      timeline[dF].cancel();
+    dF++;
+    if (dF < timeline.length && dF >= 0)
+      timeline[dF].run();
+  }
+
+  if (autorun) {
+    window.setInterval(() => {
+      window.onkeydown();
+    }, 1000);
+  }
+</script>
+</html>
