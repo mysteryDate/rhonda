@@ -4,6 +4,10 @@ const lerp = function (min, max, c) {
     return min + (max - min) * c;
 }
 
+function sin01(x) {
+  return (Math.sin(x) + 1)/2;
+}
+
 function lerpDicts(dict, start, end, t) {
   for (key in end) {
     if (end[key] instanceof Array) {

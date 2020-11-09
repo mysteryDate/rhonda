@@ -119,7 +119,7 @@
     lerpDicts(swatch, startSwatch, end, t);
 
     drawColorSwatch();
-    drawText([`ctx.fillColor = `,`"rgb(${swatch.r.toFixed(0)}, ${swatch.g.toFixed(0)}, ${swatch.b.toFixed(0)})";`]);
+    drawText([`ctx.fillStyle = `,`"rgb(${swatch.r.toFixed(0)}, ${swatch.g.toFixed(0)}, ${swatch.b.toFixed(0)})";`]);
   }
 
   function arrayColorInput(t, clock) {
@@ -132,7 +132,7 @@
     lerpDicts(swatch, startSwatch, end, Math.pow(t, 3));
 
     drawColorSwatch();
-    drawText([`ctx.fillColor = `,`[${swatch.r.toFixed(0)}, ${swatch.g.toFixed(0)}, ${swatch.b.toFixed(0)}];`]);
+    drawText([`ctx.fillStyle = `,`[${swatch.r.toFixed(0)}, ${swatch.g.toFixed(0)}, ${swatch.b.toFixed(0)}];`]);
   }
 
   const timeline = [

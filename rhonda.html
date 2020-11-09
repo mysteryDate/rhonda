@@ -14,6 +14,11 @@
 </head>
 <body>
   <img id="jeff" src="jeff2.jpg">
+  <img id="mesh3d" src="mesh.png">
+  <img id="camera" src="camera.png">
+  <img id="lighting" src="lighting.png">
+  <img id="shaders" src="shaders.png">
+  <img id="muchCode" src="too-much-code.png">
 </body>
 <script type="text/javascript" src="easing.js"></script>
 <script type="text/javascript" src="util.js"></script>
@@ -24,7 +29,6 @@
     w: 375,
     h: 150,
     x: 100,
-    y: -100,
     fontSize: 40,
     fontPosition: 0,
     radii: [
@@ -45,15 +49,22 @@
   canvas.width = canvas.height / 9 * 16;
   originalRhonda.x = canvas.width/2 - originalRhonda.w/2;
   originalRhonda.y = -originalRhonda.h;
+  // originalRhonda.y = 200;
 
   let rhonda = copyRhonda(originalRhonda);
   let startRhonda = copyRhonda(rhonda)
   const ctx = canvas.getContext("2d");
   const jeffImg = document.getElementById("jeff");
+  const meshImg = document.getElementById("mesh3d");
+  const cameraImg = document.getElementById("camera");
+  const lightingImg = document.getElementById("lighting");
+  const shadersImg = document.getElementById("shaders");
+  const codeImg = document.getElementById("muchCode");
   ctx.textBaseline = "hanging";
 
   function drawText(textArray, verticalAdjustment=0, fontFamily="Google Sans") {
     ctx.fillStyle = `rgb(${rhonda.textColor[0]}, ${rhonda.textColor[0]}, ${rhonda.textColor[2]})`;
+    ctx.textAlign = 'start';
     ctx.font = `${rhonda.fontSize}px ${fontFamily}`;
     let maxWidth = 0;
     let totalDescent = 0;
@@ -343,7 +354,7 @@
   function webGL(t) {
     const webGLText = ["const ctx = canvas.getContext('webgl');"];
     const end = {
-      y: 50,
+      y: 80,
       fontSize: 60,
     }
     let fontFamily = "Google Sans";
@@ -356,8 +367,331 @@
     drawText(webGLText, rhonda.fontSize * 0.12 + 130, "Courier New");
   }
 
+  function Mesh3d(t) {
+    const end = {
+      x: -canvas.width/2,
+      w: canvas.width * 2,
+      h: canvas.height * 2,
+      radii: [
+        new DOMPoint(0, 0),
+        new DOMPoint(0, 0),
+        new DOMPoint(0, 0),
+        new DOMPoint(0, 0),
+      ],
+      y: -canvas.height/2,
+      fontSize: 60,
+    }
+    if (!this.hasRun) startRhonda = copyRhonda(rhonda);
+    lerpDicts(rhonda, startRhonda, end, t);
+    drawRhonda();
+
+    const webGLText = ["const ctx = canvas.getContext('webgl');"];
+    const fontPos = lerp(130, canvas.height + 10, t)
+    drawText(webGLText, rhonda.fontSize * 0.12 + fontPos, "Courier New");
+
+    const x = 0;
+    const y = 0;
+    const imgW = lerp(0, canvas.width, t);
+    const imgH = lerp(0, canvas.height, t);
+
+    ctx.drawImage(
+      meshImg,
+      x,
+      y,
+      meshImg.width,
+      meshImg.height,
+      canvas.width/2 - imgW/2,
+      canvas.height/2 - imgH/2,
+      imgW,
+      imgH,
+    );
+  }
+
+  function camera(t) {
+    ctx.drawImage(cameraImg, 0, 0, cameraImg.width, cameraImg.height, 0, 0, canvas.width, canvas.height);
+  }
+
+  function lighting(t) {
+    ctx.drawImage(lightingImg, 0, 0, lightingImg.width, lightingImg.height, 0, 0, canvas.width, canvas.height);
+  }
+
+  function shaders(t) {
+    ctx.drawImage(shadersImg, 0, 0, shadersImg.width, shadersImg.height, 0, 0, canvas.width, canvas.height);
+  }
+
+  function soMuchWork(t, clock) {
+    const finalWidth = 200;
+    const end = {
+      y: 10,
+      fontSize: 60,
+      h: 100,
+      w: finalWidth,
+      x: canvas.width/2 - finalWidth/2,
+      radii: [
+        new DOMPoint(50, 50),
+        new DOMPoint(50, 50),
+        new DOMPoint(50, 50),
+        new DOMPoint(50, 50),
+      ],
+    }
+    rhonda.text = ["🥵"];
+    if (!this.hasRun) startRhonda = copyRhonda(rhonda);
+    lerpDicts(rhonda, startRhonda, end, t);
+
+    drawRhonda();
+    drawText(rhonda.text, rhonda.fontSize * 0.12 + rhonda.fontPosition);
+
+    const s = 1;
+    const w = s * codeImg.width;
+    const h = s * codeImg.height;
+    const y = lerp(canvas.height + 100, 150, t);
+    ctx.drawImage(codeImg,
+      0, 0, codeImg.width, codeImg.height,
+      canvas.width/2 - w/2, y, w, h);
+  }
+
+  function soMuchWork2(t, clock) {
+    drawRhonda();
+    drawText(rhonda.text, rhonda.fontSize * 0.12 + rhonda.fontPosition);
+
+    const s = 1;
+    const w = s * codeImg.width;
+    const h = s * codeImg.height;
+    const y = 150;
+    const scroll = lerp(0, codeImg.height - canvas.height, t);
+    ctx.drawImage(codeImg,
+      0, scroll, codeImg.width, codeImg.height,
+      canvas.width/2 - w/2, y, w, h);
+  }
+
+  function certainDevices(t, clock) {
+    const finalWidth = 300;
+    const finalHeight = 150;
+    const end = {
+      y: canvas.height/2 - finalHeight/2,
+      h: 150,
+      w: finalWidth,
+      x: canvas.width/2 - finalWidth/2,
+      radii: [
+        new DOMPoint(50, 50),
+        new DOMPoint(50, 50),
+        new DOMPoint(50, 50),
+        new DOMPoint(50, 50),
+      ],
+    }
+    rhonda.text = ["😵📞💀"];
+    if (!this.hasRun) startRhonda = copyRhonda(rhonda);
+    lerpDicts(rhonda, startRhonda, end, t);
+
+    drawRhonda();
+    drawText(rhonda.text, rhonda.fontSize * 0.12 + rhonda.fontPosition);
+
+    const s = 1;
+    const w = s * codeImg.width;
+    const h = s * codeImg.height;
+    const y = lerp(150, canvas.height + 100, t);
+    ctx.drawImage(codeImg,
+      0, codeImg.height - canvas.height, codeImg.width, codeImg.height,
+      canvas.width/2 - w/2, y, w, h);
+  }
+
+  function lightWeightRoundRectImplementation(t) {
+    const canvas2DText = [
+      "ctx.roundRect(x, y, width, height, radius);",
+    ];
+    const end = {
+      y: 100,
+      h: 100,
+      fontSize: 60,
+    }
+    rhonda.text = ["😲"]
+    if (!this.hasRun) startRhonda = copyRhonda(rhonda);
+    lerpDicts(rhonda, startRhonda, end, t);
+    drawRhonda();
+    drawText(rhonda.text, rhonda.fontSize * 0.12 + rhonda.fontPosition);
+    rhonda.fontSize = lerp(0, 20, t);
+    drawText(canvas2DText, rhonda.fontSize * 0.12 + 150, "Courier New");
+    rhonda.fontSize = 60;
+  }
+
+  function flyAboutThePage(t, clock) {
+    const end = {
+      x: 300,
+      y: 200,
+    }
+    ;
+    rhonda.text = ["🚀"]
+
+    if (!this.hasRun) startRhonda = copyRhonda(rhonda);
+    lerpDicts(rhonda, startRhonda, end, t);
+    ctx.save();
+    rhonda.x += Math.cos(t * 2 * Math.PI) * 300 * Math.sin(t * Math.PI);
+    rhonda.y += Math.sin(t * 2 * Math.PI) * 300 * Math.sin(t * Math.PI);
+    drawRhonda();
+    drawText(rhonda.text, rhonda.fontSize * 0.12 + rhonda.fontPosition);
+    ctx.restore();
+
+    ctx.textAlign = 'center';
+    ctx.font = "20px Courier New";
+    const canvas2DText = [
+      `ctx.roundRect(${rhonda.x.toFixed(0)}, ${rhonda.y.toFixed(0)}, ${rhonda.w.toFixed(0)}, ${rhonda.h.toFixed(0)}, ${rhonda.radii[0].x.toFixed(0)});`,
+    ]
+    const textY = lerp(293, canvas.height-40, t);
+    ctx.fillText(canvas2DText, canvas.width/2, textY);
+  }
+
+  function spinningTwirling(t, clock) {
+    const end = {
+      x: canvas.width/2 - rhonda.w/2,
+      y: 100
+    }
+    ;
+    rhonda.text = ["💫"]
+
+    if (!this.hasRun) startRhonda = copyRhonda(rhonda);
+    lerpDicts(rhonda, startRhonda, end, t);
+    ctx.save();
+    const angle = t * Math.PI * 2;
+    ctx.translate(rhonda.x, rhonda.y);
+    ctx.rotate(angle);
+    ctx.translate(-rhonda.x, -rhonda.y);
+    drawRhonda();
+    drawText(rhonda.text, rhonda.fontSize * 0.12 + rhonda.fontPosition);
+    ctx.restore();
+
+    ctx.textAlign = 'center';
+    ctx.font = "20px Courier New";
+    const canvas2DText = [
+      `ctx.rotate(${(angle / Math.PI * 180).toFixed(0)});`,
+      `ctx.roundRect(${rhonda.x.toFixed(0)}, ${rhonda.y.toFixed(0)}, ${rhonda.w.toFixed(0)}, ${rhonda.h.toFixed(0)}, ${rhonda.radii[0].x.toFixed(0)});`
+      ];
+    const textY = lerp(canvas.height-40, 293, t);
+    ctx.fillText(canvas2DText[0], canvas.width/2, textY);
+    ctx.fillText(canvas2DText[1], canvas.width/2, textY + 30);
+  }
+
+  function changingLooks(t, clock) {
+    const end = {
+      bgColor: [
+        95, 34, 47
+      ],
+    };
+    rhonda.text = ["🎨"]
+
+    if (!this.hasRun) startRhonda = copyRhonda(rhonda);
+    lerpDicts(rhonda, startRhonda, end, t);
+    let radius = startRhonda.radii[0].x - 10 * (Math.cos(t * Math.PI * 2) + 1);
+    radius = Math.min(radius, rhonda.h/2);
+    for (var i = 0; i < rhonda.radii.length; i++) {
+      rhonda.radii[i].x = radius;
+      rhonda.radii[i].y = radius;
+    }
+    drawRhonda();
+    drawText(rhonda.text, rhonda.fontSize * 0.12 + rhonda.fontPosition);
+
+    ctx.textAlign = 'center';
+    ctx.font = "20px Courier New";
+    ctx.fillStyle = "black";
+    const canvas2DText = [
+      `ctx.fillStyle = rgb[${rhonda.bgColor[0].toFixed(0)}, ${rhonda.bgColor[1].toFixed(0)}, ${rhonda.bgColor[2].toFixed(0)}];`,
+      `ctx.roundRect(${rhonda.x.toFixed(0)}, ${rhonda.y.toFixed(0)}, ${rhonda.w.toFixed(0)}, ${rhonda.h.toFixed(0)}, ${rhonda.radii[0].x.toFixed(0)});`
+      ];
+    ctx.fillText(canvas2DText[0], canvas.width/2, 293);
+    ctx.fillText(canvas2DText[1], canvas.width/2, 293 + 30);
+  }
+
+  function beautifulSimpleLightweightFun(t, clock) {
+    const emojiArray = ["😍", "😇", "🤓", "😎"];
+    const end = {
+      y: 100,
+      bgColor: originalRhonda.bgColor,
+    };
+    const emojiIndex = Math.min(Math.floor(clock * emojiArray.length), emojiArray.length - 1);
+    rhonda.text = [emojiArray[emojiIndex]];
+
+    if (!this.hasRun) startRhonda = copyRhonda(rhonda);
+    lerpDicts(rhonda, startRhonda, end, t);
+    drawRhonda();
+    drawText(rhonda.text, rhonda.fontSize * 0.12 + rhonda.fontPosition);
+
+    const fs = lerp(20, 0, t);
+    ctx.textAlign = 'center';
+    ctx.font = `${fs}px Courier New`;
+    ctx.fillStyle = "black";
+    const canvas2DText = [
+      `ctx.fillStyle = rgb[${rhonda.bgColor[0].toFixed(0)}, ${rhonda.bgColor[1].toFixed(0)}, ${rhonda.bgColor[2].toFixed(0)}];`,
+      `ctx.roundRect(${rhonda.x.toFixed(0)}, ${rhonda.y.toFixed(0)}, ${rhonda.w.toFixed(0)}, ${rhonda.h.toFixed(0)}, ${rhonda.radii[0].x.toFixed(0)});`
+      ];
+    ctx.fillText(canvas2DText[0], canvas.width/2, 293);
+    ctx.fillText(canvas2DText[1], canvas.width/2, 293 + fs * 3/2);
+  }
+
+  function nestledUp(t, clock) {
+    const end = {
+      x: canvas.width - rhonda.w - 10,
+      y: canvas.height/2,
+    }
+
+    rhonda.text = ["😊"];
+    if (!this.hasRun) startRhonda = copyRhonda(rhonda);
+    lerpDicts(rhonda, startRhonda, end, t);
+    ctx.save();
+    ctx.translate(rhonda.x + rhonda.w/2, rhonda.y + rhonda.h/2);
+    const angle = Math.cos(clock * Math.PI * 2) - 1;
+    ctx.rotate(angle * 0.2);
+    ctx.translate(-rhonda.x - rhonda.w/2, -rhonda.y - rhonda.h/2);
+    drawRhonda();
+    ctx.restore();
+    drawText(rhonda.text, rhonda.fontSize * 0.12 + rhonda.fontPosition);
+
+    const fs = 60;
+    const x = lerp(-100, 20, t);
+    const y = canvas.height/2;
+    ctx.font = `${fs}px Google Sans`;
+    ctx.fillStyle = "black";
+    ctx.textBaseline = "center";
+    ctx.fillText("Canvas2D", x, y);
+  }
+
+  function alwaysBeen(t, clock) {
+    const end = {
+      x: canvas.width/2,
+    }
+
+    rhonda.text = ["😍"];
+    if (!this.hasRun) startRhonda = copyRhonda(rhonda);
+    lerpDicts(rhonda, startRhonda, end, t);
+    ctx.save();
+    ctx.translate(rhonda.x + rhonda.w/2, rhonda.y + rhonda.h/2);
+    const angle = Math.cos(clock * Math.PI * 2) - 1;
+    ctx.rotate(angle * 0.2);
+    ctx.translate(-rhonda.x - rhonda.w/2, -rhonda.y - rhonda.h/2);
+    drawRhonda();
+    ctx.restore();
+    drawText(rhonda.text, rhonda.fontSize * 0.12 + rhonda.fontPosition);
+
+    const x = lerp(20, 60, t);
+    ctx.font = `${60}px Google Sans`;
+    ctx.fillStyle = "black";
+    ctx.textBaseline = "center";
+    ctx.fillText("Canvas2D", x, canvas.height/2);
+
+    ctx.fillStyle = "black";
+    ctx.textAlign = "center";
+    let text = "It's";
+    if (clock > 0.25)
+      text += " always";
+    if (clock > 0.5)
+      text += " been";
+    if (clock > 0.75)
+      text += " you";
+    ctx.font = `${40}px Google Sans`;
+    ctx.fillText(text, canvas.width/2, canvas.height/4);
+  }
+
   const timeline = [
-    new DrawFunction(slideIn, 1),
+    new DrawFunction(slideIn,
+    1),
     new DrawFunction(roundRectangle, 1),
     new DrawFunction(rectangleLove, 1),
     new DrawFunction(toTextBubble, 1),
@@ -371,14 +705,28 @@
     new DrawFunction(dance, 4, easing.easeInOutBack),
     new DrawFunction(canvasImplementation, 1),
     new DrawFunction(webGL, 1),
-    // new DrawFunction(() => {}, 1),
+    new DrawFunction(Mesh3d, 2),
+    new DrawFunction(camera, 1),
+    new DrawFunction(lighting, 1),
+    new DrawFunction(shaders, 1),
+    new DrawFunction(soMuchWork, 1),
+    new DrawFunction(soMuchWork2, 2),
+    new DrawFunction(certainDevices, 1),
+    new DrawFunction(lightWeightRoundRectImplementation, 1),
+    new DrawFunction(flyAboutThePage, 1),
+    new DrawFunction(spinningTwirling, 1),
+    new DrawFunction(changingLooks, 2),
+    new DrawFunction(beautifulSimpleLightweightFun, 2),
+    new DrawFunction(nestledUp, 2),
+    new DrawFunction(alwaysBeen, 2),
   ];
   let startTime = 0;
 
   let dF = -1;
+  // dF = 0;
   let autorun = true;
   autorun = false;
-  // dF = timeline.length - 2;
+  // dF = timeline.length - 3;
   // timeline[dF].run();
   window.onkeydown = (e) => {
     if (dF > 0 && dF < timeline.legth)
@@ -391,7 +739,7 @@
   if (autorun) {
     window.setInterval(() => {
       window.onkeydown();
-    }, 1000);
+    }, 2000);
   }
 </script>
 </html>
