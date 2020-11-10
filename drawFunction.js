@@ -11,6 +11,7 @@ class DrawFunction {
     this.startTime = 0;
     this.isCancelled = false;
     this.hasRun = false;
+    this.lastRequest;
   }
 
   run() {
@@ -27,10 +28,11 @@ class DrawFunction {
     this.func(t, clock);
 
     if (clock <= 1.0 && !this.isCancelled)
-      window.requestAnimationFrame(this.draw.bind(this));
+      this.lastRequest = window.requestAnimationFrame(this.draw.bind(this));
   }
 
   cancel() {
     this.isCancelled = true;
+    window.cancelAnimationFrame(this.lastRequest);
   }
 }

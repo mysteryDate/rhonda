@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Perspective Transforms</title>
+  <style type="text/css">
+    div {
+      border: 1px solid black;
+      position: absolute;
+    }
+    canvas {
+
+    }
+  </style>
+</head>
+<body>
+  <div id="border"></div>
+</body>
+<script type="text/javascript" src="easing.js"></script>
+<script type="text/javascript" src="util.js"></script>
+<script type="text/javascript" src="drawFunction.js"></script>
+<script type="text/javascript">
+  /*
+  Perspective transforms
+  Canvas2D is 2D, it’s right in the name but can 2D be… 3D? (show card flipping animation). (With Star Wars text crawl effect):
+    Introducing….
+    Canvas2.5D!!!
+  Still just called Canvas2D
+  But now, with non-affine transforms!
+  */
+  const border = document.getElementById("border");
+  const canvas = document.createElement("canvas");
+  document.body.appendChild(canvas);
+  canvas.height = 400;
+  canvas.width = canvas.height / 9 * 16;
+  border.style.width = `${canvas.width}px`;
+  border.style.height = `${canvas.height}px`;
+  const ctx = canvas.getContext("2d");
+  ctx.textBaseline = "middle";
+  ctx.textAlign = 'center';
+  ctx.font = "20px Google Sans";
+
+  "use strict";
+  const A0 = {
+    x: canvas.width/2,
+    y: canvas.height + 100,
+    x1: canvas.width/2,
+    y1: -100,
+    fontSize: 100,
+    fontSize1: 100,
+    shapeW: 200,
+  };
+  let A = copyRhonda(A0);
+  let Atemp = copyRhonda(A);
+
+  function drawShapes(x, y, w) {
+    const startFill = ctx.fillStyle;
+    const startLineWidth = ctx.lineWidth;
+    ctx.lineWidth = w/50;
+
+    const R = w/4;
+    const rectSide = 2 * R;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.beginPath();
+    ctx.fillStyle = "cyan";
+    ctx.arc(-w + R, 0, R, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.rect(-R, -R, 2*R, 2*R);
+    ctx.fillStyle = "magenta";
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(w - R, -R);
+    ctx.lineTo(w, R);
+    ctx.lineTo(w - 2*R, R);
+    ctx.closePath();
+    ctx.fillStyle = "yellow";
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.fillStyle = startFill;
+    ctx.lineWidth = startLineWidth;
+  }
+
+  function slideIn(t, clock) {
+    const E = {
+      y: canvas.height * 1/3,
+      y1: canvas.height * 2/3,
+    }
+    if (!this.hasRun) Atemp = copyRhonda(A);
+    lerpDicts(A, Atemp, E, t);
+
+    ctx.font = `${A.fontSize}px Google Sans`;
+    ctx.fillText("Canvas2D", A.x, A.y);
+
+    drawShapes(A.x1, A.y1, A.shapeW);
+  }
+
+  let currentRotation = 0;
+  function rotate3d(t, clock) {
+    const E = {
+      y: canvas.height * 1/3,
+      y1: canvas.height * 2/3,
+    }
+    if (!this.hasRun) Atemp = copyRhonda(A);
+    lerpDicts(A, Atemp, E, t);
+
+    ctx.font = `${A.fontSize}px Google Sans`;
+    ctx.fillText("Canvas2D", A.x, A.y);
+
+    drawShapes(A.x1, A.y1, A.shapeW);
+
+    const rotationSpeed = 0.3;
+    const rT = (this.startTime - performance.now()) / 1000 * rotationSpeed * 360;
+    canvas.style.transform = `rotate3d(0, 1, 0.5, ${rT}deg)`;
+
+    currentRotation = rT;
+  }
+
+  function spinOut(t, clock) {
+    const E = {
+      shapeW: 0,
+      fontSize: 0,
+    }
+    if (!this.hasRun) Atemp = copyRhonda(A);
+    lerpDicts(A, Atemp, E, t);
+
+    ctx.font = `${A.fontSize}px Google Sans`;
+    ctx.fillText("Canvas2D", A.x, A.y);
+
+    drawShapes(A.x1, A.y1, A.shapeW);
+
+    const rotationSpeed = 1;
+    const rT = (this.startTime - performance.now()) / 1000 * rotationSpeed * 360 + currentRotation;
+    canvas.style.transform = `rotate3d(0, 1, 0.5, ${rT}deg)`;
+  }
+
+  function introducing(t, clock) {
+    const E = {
+      y1: -150,
+    }
+    if (!this.hasRun) {
+      canvas.style.transform = `perspective(200px) rotateX(45deg) translate3d(0, 0, 10px)`;
+      A.y1 = canvas.height;
+      Atemp = copyRhonda(A);
+      ctx.font = `${A.fontSize1}px Google Sans`;
+    }
+    lerpDicts(A, Atemp, E, clock);
+    // transform: perspective(200px) rotateX(39deg) translate3d(0, 0, 50px);
+
+    ctx.fillText("Introducing...", A.x1, A.y1)
+    ctx.fillText("Canvas2.5D!!!", A.x1, A.y1 + A.fontSize1 * 3.3);
+  }
+
+  function slideIn2(t, clock) {
+    const E = {
+      y: canvas.height * 1/3,
+      y1: canvas.height * 2/3,
+    }
+    if (!this.hasRun) {
+      Atemp = copyRhonda(A0);
+      A = copyRhonda(A0);
+      canvas.style.transform = `rotateX(0deg) translate3d(0, 0, 0px)`;
+      ctx.font = `${A.fontSize}px Google Sans`;
+    }
+    lerpDicts(A, Atemp, E, t);
+
+    ctx.font = `${A.fontSize}px Google Sans`;
+    ctx.fillText("Canvas2D", A.x, A.y);
+
+    drawShapes(A.x1, A.y1, A.shapeW);
+  }
+
+  function nonAffine(t, clock) {
+    const rotationSpeed = 1/3;
+    const rotateX = Math.sin((this.startTime - performance.now()) / 1000 * rotationSpeed * Math.PI * 2) * 45;
+    canvas.style.transform = `perspective(200px) rotateX(${rotateX}deg) translate3d(0, 0, 10px)`;
+
+    ctx.font = `${A.fontSize}px Google Sans`;
+    ctx.fillText("Canvas2D", A.x, A.y);
+
+    drawShapes(A.x1, A.y1, A.shapeW);
+  }
+
+  const timeline = [
+    new DrawFunction(slideIn, 1),
+    new DrawFunction(rotate3d, 30),
+    new DrawFunction(spinOut, 0.5),
+    new DrawFunction(introducing, 3),
+    new DrawFunction(slideIn2, 1),
+    new DrawFunction(nonAffine, 10),
+  ];
+  let startTime = 0;
+
+  let dF = -1;
+  // dF = 0;
+  let autorun = true;
+  autorun = false;
+  // dF = timeline.length - 1;
+  // timeline[dF].run();
+  window.onkeydown = (e) => {
+    if (dF > 0 && dF < timeline.length)
+      timeline[dF].cancel();
+   dF++;
+    if (dF < timeline.length && dF >= 0)
+      timeline[dF].run();
+  }
+
+  if (autorun) {
+    window.setInterval(() => {
+      window.onkeydown();
+    }, 1000);
+  }
+</script>
+</html>
