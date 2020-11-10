@@ -655,7 +655,7 @@
 
   function alwaysBeen(t, clock) {
     const end = {
-      x: canvas.width/2,
+      x: canvas.width/2 - 10,
     }
 
     rhonda.text = ["😍"];
@@ -664,20 +664,20 @@
     ctx.save();
     ctx.translate(rhonda.x + rhonda.w/2, rhonda.y + rhonda.h/2);
     const angle = Math.cos(clock * Math.PI * 2) - 1;
-    ctx.rotate(angle * 0.2);
+    ctx.rotate(angle * 0.1);
     ctx.translate(-rhonda.x - rhonda.w/2, -rhonda.y - rhonda.h/2);
     drawRhonda();
     ctx.restore();
     drawText(rhonda.text, rhonda.fontSize * 0.12 + rhonda.fontPosition);
 
-    const x = lerp(20, 60, t);
+    const x = lerp(20, 70, t);
     ctx.font = `${60}px Google Sans`;
     ctx.fillStyle = "black";
     ctx.textBaseline = "center";
     ctx.fillText("Canvas2D", x, canvas.height/2);
 
     ctx.fillStyle = "black";
-    ctx.textAlign = "center";
+    // ctx.textAlign = "center";
     let text = "It's";
     if (clock > 0.25)
       text += " always";
@@ -686,7 +686,7 @@
     if (clock > 0.75)
       text += " you";
     ctx.font = `${40}px Google Sans`;
-    ctx.fillText(text, canvas.width/2, canvas.height/4);
+    ctx.fillText(text, 70, canvas.height/4);
   }
 
   const timeline = [
@@ -716,7 +716,7 @@
     new DrawFunction(flyAboutThePage, 1),
     new DrawFunction(spinningTwirling, 1),
     new DrawFunction(changingLooks, 2),
-    new DrawFunction(beautifulSimpleLightweightFun, 2),
+    new DrawFunction(beautifulSimpleLightweightFun, 3),
     new DrawFunction(nestledUp, 2),
     new DrawFunction(alwaysBeen, 2),
   ];

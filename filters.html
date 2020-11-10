@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<meta charset="UTF-8">
+<html>
+<head>
+  <title>Filters</title>
+  <style>
+      html, body {
+        height: 100%;
+        margin: 0;
+      }
+      svg {
+        /*border: 1px solid black;*/
+        position: absolute;
+        /*display: none;*/
+      }
+      canvas {
+        border: 1px solid black;
+        position: absolute;
+        left: 0px;
+      }
+  </style>
+</head>
+<body>
+  <svg width="711" height="400" viewBox="0 0 711 400" id="svg">
+    <defs>
+        <filter id="displacementFilter">
+            <feTurbulence type="turbulence" baseFrequency="0.05"
+                numOctaves="2" result="turbulence"/>
+            <feDisplacementMap id="feDM" in2="turbulence" in="SourceGraphic"
+                scale="50" xChannelSelector="R" yChannelSelector="G">
+                <animate attributeName="scale" values="0;100;0" dur="5s" repeatCount="indefinite" />
+            </feDisplacementMap>
+          </filter>
+        <feDisplacementMap id="disp1" in2="turbulence" in="SourceGraphic"
+            scale="100" result="displacement">
+    </defs>
+    <circle cx="356" cy="150" r="120" fill="cyan"
+          style="filter: url(#displacementFilter); stroke: black; stroke-width: 10px;">
+          <animate attributeName="cx" values="356;326;356" dur="5s" repeatCount="indefinite" />
+          <animate attributeName="cy" values="150;120;150" dur="5s" repeatCount="indefinite" />
+    </circle>
+  </svg>
+</body>
+<script type="text/javascript" src="util.js"></script>
+<script type="text/javascript" src="drawFunction.js"></script>
+<script type="text/javascript">
+  const canvas = document.createElement("canvas");
+  canvas.height = 400;
+  canvas.width = canvas.height / 9 * 16;
+  const ctx = canvas.getContext("2d");
+  document.body.appendChild(canvas);
+
+  const text = {
+    size: 40,
+    font: "Google Sans",
+    message: ["hi"],
+    x: canvas.width/2,
+    y: canvas.height + 40,
+    // y: canvas.height/2,
+    color: "black",
+  }
+  let startText = {};
+  Object.assign(startText, text);
+
+  const subText = {};
+  let startSubText = {
+    x: 20,
+    y: canvas.height + 40,
+    size: 18,
+    y: canvas.height + 40,
+    font: "Courier New",
+  };
+  Object.assign(subText, startSubText);
+  ctx.textBaseline = "middle";
+  ctx.textAlign = "center";
+  ctx.font = `${text.size}px ${text.font}`;
+
+  const svg = document.getElementById("svg");
+  svg.style.top = `${-400}px`;
+
+  function slideIn(t, clock) {
+    text.message = ["👩‍🎨 SVG Filters! 🖼"];
+    const endText = {
+      y: canvas.height - 80,
+    }
+    if (!this.hasRun) startText = copyRhonda(text);
+    lerpDicts(text, startText, endText, t);
+    ctx.fillText(text.message[0], text.x, text.y);
+
+    const svgTop = lerp(-300, 0, t);
+    svg.style.top = `${svgTop}px`;
+  }
+
+  function badInterface(t, clock) {
+    const interfaceCode = [
+    '<svg>',
+    '  <defs>',
+    '    <filter id="FilterBlur1">',
+    '      <feTurbulence type="turbulence" baseFrequency="0.05"',
+    '          numOctaves="2" result="turbulence"/>',
+    '      <feDisplacementMap in2="turbulence" in="SourceGraphic"',
+    '          scale="100" result="displacement"/>',
+    '      <feGaussianBlur in="displacement" stdDeviation="2" />',
+    '    </filter>',
+    '    <filter id="FilterBlur2">',
+    '  </defs>',
+    '</svg>',
+    '<script>',
+    '  ctx.filter = ctx.filter = "url(\'#FilterBlur1\')";',
+    '<\/script>'];
+
+    const endText = {
+      y: 40,
+    }
+    if (!this.hasRun) startText = copyRhonda(text);
+    lerpDicts(text, startText, endText, t);
+    if (t > 0.5)
+      text.message = ["😬"];
+    ctx.textAlign = 'center';
+    ctx.font = `${text.size}px ${text.font}`;
+    ctx.fillText(text.message[0], text.x, text.y);
+
+    const endSubText = {
+      y: 100,
+    }
+    if (!this.hasRun) startsubText = copyRhonda(subText);
+    lerpDicts(subText, startsubText, endSubText, t);
+
+    ctx.textAlign = 'start';
+    ctx.font = `${subText.size}px ${subText.font}`;
+    for (var i = 0; i < interfaceCode.length; i++) {
+     ctx.fillText(interfaceCode[i], subText.x, subText.y + i * subText.size);
+    }
+
+    const svgTop = lerp(0, -400, t);
+    svg.style.top = `${svgTop}px`;
+  }
+
+  const fe = document.getElementById("feDM");
+  function useWithEase(t, clock) {
+    const endText = {
+      y: canvas.height - 80,
+      size: 15,
+    }
+    ctx.textAlign = 'center';
+    ctx.font = `${text.size}px Courier New`;
+
+    const scale = fe.scale.animVal;
+    if (t > 0.5) {
+      endText.x = 20;
+      ctx.textAlign = 'start';
+      text.message = [
+        "const turbulence = new CanvasFilter.Turbulence(0.05, 2);",
+        `const displacementMap = new CanvasFilter.DisplacementMap(turbulence, ${scale.toFixed(0)});`,
+        "ctx.filter = new CanvasFilter.Sequence([displacementMap, blur]);",
+      ]
+    }
+    if (!this.hasRun) startText = copyRhonda(text);
+    lerpDicts(text, startText, endText, t);
+    for (var i = 0; i < text.message.length; i++) {
+      ctx.fillText(text.message[i], text.x, text.y + i * text.size);
+    }
+
+    const svgTop = lerp(-400, 0, t);
+    svg.style.top = `${svgTop}px`;
+
+    if (t > 0.99)
+      window.onkeydown();
+  }
+
+  function updateTextMessage(t, clock) {
+    const scale = fe.scale.animVal;
+    text.message = [
+      "const turbulence = new CanvasFilter.Turbulence(0.05, 2);",
+      `const displacementMap = new CanvasFilter.DisplacementMap(turbulence, ${scale.toFixed(0)});`,
+      "ctx.filter = new CanvasFilter.Sequence([displacementMap, blur]);",
+    ]
+    for (var i = 0; i < text.message.length; i++) {
+      ctx.fillText(text.message[i], text.x, text.y + i * text.size);
+    }
+  }
+
+  const timeline = [
+   new DrawFunction(slideIn, 4),
+   new DrawFunction(badInterface, 2),
+   new DrawFunction(useWithEase, 2),
+   new DrawFunction(updateTextMessage, 20),
+  ];
+
+  let startTime = 0;
+
+  let dF = -1;
+  let autorun = true;
+  autorun = false;
+  // dF = timeline.length - 2;
+  // timeline[dF].run();
+  window.onkeydown = (e) => {
+    if (dF > 0 && dF < timeline.legth)
+      timeline[dF].cancel();
+    dF++;
+    if (dF < timeline.length && dF >= 0)
+      timeline[dF].run();
+  }
+
+  if (autorun) {
+    window.setInterval(() => {
+      window.onkeydown();
+    }, 2000);
+  }
+
+</script>
+</html>
